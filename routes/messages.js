@@ -4,14 +4,18 @@ const Message = require('../Models/Message');
 const brain = require('brain.js');
 const { net, loadModel, saveModel } = require('../model');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = 'sahith';
+const dotEnv = require('dotenv');
+
+dotEnv.config();
+
+const key = process.env.JWT_SECRET;
 
 const verifyToken = (req, res, next) => {
   const token = req.headers['authorization'];
   if (!token) return res.status(403).json({ message: 'No token provided' });
 
   try {
-    const decoded = jwt.verify(token.split(' ')[1], JWT_SECRET);
+    const decoded = jwt.verify(token.split(' ')[1], key);
     req.userId = decoded.id;
     next();
   } catch (err) {
@@ -89,7 +93,7 @@ router.get('/train', async (req, res) => {
             logPeriod: 10,
         });
 
-        saveModel(); // Save the trained model to file
+        saveModel();
         res.json({ message: "Model trained and saved successfully!" });
     } catch (err) {
         console.error('Training error:', err);
